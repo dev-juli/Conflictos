@@ -1,7 +1,7 @@
-const Area = require('../models/area');
+import Area from '../models/area.js';
 
 // Obtener todas las áreas
-exports.getAll = async (req, res) => {
+export const getAll = async (req, res) => {
   try {
     const areas = await Area.find();
     res.json(areas);
@@ -11,7 +11,7 @@ exports.getAll = async (req, res) => {
 };
 
 // Obtener área por ID
-exports.getById = async (req, res) => {
+export const getById = async (req, res) => {
   try {
     const area = await Area.findById(req.params.id);
     if (!area) return res.status(404).json({ error: 'Área no encontrada' });
@@ -22,7 +22,7 @@ exports.getById = async (req, res) => {
 };
 
 // Crear área
-exports.create = async (req, res) => {
+export const create = async (req, res) => {
   try {
     const area = new Area(req.body);
     await area.save();
@@ -33,7 +33,7 @@ exports.create = async (req, res) => {
 };
 
 // Actualizar área
-exports.update = async (req, res) => {
+export const update = async (req, res) => {
   try {
     const area = await Area.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!area) return res.status(404).json({ error: 'Área no encontrada' });
@@ -44,7 +44,7 @@ exports.update = async (req, res) => {
 };
 
 // Eliminar área
-exports.remove = async (req, res) => {
+export const remove = async (req, res) => {
   try {
     const area = await Area.findByIdAndDelete(req.params.id);
     if (!area) return res.status(404).json({ error: 'Área no encontrada' });

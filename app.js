@@ -1,6 +1,9 @@
-const express = require('express');
-const mongoose = require('mongoose');
-require('dotenv').config();
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import areaRoutes from './routes/areaRoutes.js';
+
+dotenv.config();
 
 const app = express();
 
@@ -14,9 +17,6 @@ mongoose.connect(process.env.MONGO_URL, {
 })
 .then(() => console.log('DB conectada!'))
 .catch(err => console.error('Error conectando DB:', err));
-
-// Importa las rutas
-const areaRoutes = require('./routes/areaRoutes');
 
 // Usa las rutas
 app.use('/api/areas', areaRoutes);
