@@ -1,42 +1,40 @@
 // app.js
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import mongoose from 'mongoose';
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
 
-import areasRouter from './routes/areas.js';
-import materiasRouter from './routes/materias.js';
+import materiasRoutes from "./routes/materiasRoutes.js";
+import areaRoutes from "./routes/areaRoutes.js"; // <-- ya convertido a ES Modules
 
 dotenv.config();
 
 const app = express();
+
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// Rutas
-app.use('/api/areas', areasRouter);
-app.use('/api/materias', materiasRouter);
+// Rutas principales
+app.use("/api/materias", materiasRoutes);
+app.use("/api/areas", areaRoutes);
 
-// Middleware errores (simple)
+// Middleware de errores
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  console.error("❌ Error:", err);
+  res.status(500).json({ success: false, message: "Error interno del servidor" });
 });
 
-// Conexión a Mongo y arranque
-const MONGO_URL = process.env.MONGO_URL;
-if (!MONGO_URL) {
-  console.error('❌ Falta MONGO_URL en .env');
-  process.exit(1);
-}
+// Configuración del servidor y conexión a MongoDB
+const PORT = process.env.PORT || 3000;
+console.log("🔍 MONGO_URL:", process.env.MONGO_URL);
 
-mongoose.connect(MONGO_URL)
+mongoose
+  .connect(process.env.MONGO_URL)
   .then(() => {
-    console.log('✅ Conectado a MongoDB');
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`🚀 Servidor en http://localhost:${PORT}`));
+    console.log("✅ Conectado a MongoDB");
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
+    });
   })
-  .catch(err => {
-    console.error('❌ Error conectando a MongoDB:', err);
-    process.exit(1);
-  });
+  .catch((err) => console.error("❌ Error conectando a MongoDB:", err));

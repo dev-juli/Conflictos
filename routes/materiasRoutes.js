@@ -4,15 +4,24 @@ import * as materiasCtrl from '../controllers/materiasController.js';
 
 const router = Router();
 
+// Listar todas las materias
 router.get('/', materiasCtrl.getAll);
+// Obtener una materia por ID
 router.get('/:id', materiasCtrl.getById);
-router.post('/', materiasCtrl.create);
-router.put('/:id', materiasCtrl.update);
-router.delete('/:id', materiasCtrl.remove);
 
-// (Opcional) también expones /api/materias/area/:id si lo quieres:
-/*
+// Crear materia
+router.post('/', materiasCtrl.create);
+
+// Actualizar materia
+router.put('/:id', materiasCtrl.update);
+
+// Listar materias por área
 router.get('/area/:id', materiasCtrl.getByArea);
-*/
+
+// Activar materia
+router.put('/:id/activar', materiasCtrl.activate);
+
+// Desactivar materia
+router.put('/:id/desactivar', materiasCtrl.deactivate);
 
 export default router;

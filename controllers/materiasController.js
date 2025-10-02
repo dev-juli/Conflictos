@@ -37,7 +37,7 @@ export async function getById(req, res) {
   }
 }
 
-// GET /api/areas/:id/materias  (también lo implementamos aquí por si se quiere llamar desde /api/areas)
+// GET /api/areas/:id/materias
 export async function getByArea(req, res) {
   try {
     const { id } = req.params;
@@ -59,12 +59,10 @@ export async function create(req, res) {
   try {
     const { area, nombre, codigo, esIndependiente, porcentajeArea, intensidadHoraria } = req.body;
 
-    // campos obligatorios básicos
     if (!nombre || !codigo || typeof esIndependiente !== 'boolean') {
       return resp(res, 400, false, 'nombre, codigo y esIndependiente son obligatorios (esIndependiente debe ser boolean)');
     }
 
-    // area obligatorio (según requerimiento)
     if (!area) {
       return resp(res, 400, false, 'area es obligatorio (id de Area)');
     }
@@ -73,7 +71,6 @@ export async function create(req, res) {
     const areaExists = await Area.findById(area);
     if (!areaExists) return resp(res, 404, false, 'Área no encontrada');
 
-    // reglas independiente/porcentaje
     if (esIndependiente && porcentajeArea !== undefined && porcentajeArea !== null) {
       return resp(res, 400, false, 'Materia independiente no debe tener porcentajeArea');
     }
@@ -84,7 +81,6 @@ export async function create(req, res) {
       if (typeof porcentajeArea !== 'number') return resp(res, 400, false, 'porcentajeArea debe ser un número');
       if (porcentajeArea < 0 || porcentajeArea > 100) return resp(res, 400, false, 'porcentajeArea debe estar entre 0 y 100');
 
-      // Validación: la suma de porcentajes del área no debe superar 100
       const materiasArea = await Materia.find({ area: area, activa: true }).select('porcentajeArea');
       const sumaActual = materiasArea.reduce((s, m) => s + (m.porcentajeArea || 0), 0);
       if (sumaActual + porcentajeArea > 100) {
@@ -92,7 +88,6 @@ export async function create(req, res) {
       }
     }
 
-    // crear
     const materia = new Materia({
       area,
       nombre,
@@ -124,14 +119,12 @@ export async function update(req, res) {
 
     const { area, nombre, codigo, esIndependiente, porcentajeArea, intensidadHoraria } = req.body;
 
-    // si se quiere cambiar el area, validar
     if (area !== undefined) {
       if (!isValidId(area)) return resp(res, 400, false, 'ID de area inválido');
       const areaExists = await Area.findById(area);
       if (!areaExists) return resp(res, 404, false, 'Área (nueva) no encontrada');
     }
 
-    // validaciones de independiente/porcentaje
     if (esIndependiente === true && porcentajeArea !== undefined && porcentajeArea !== null) {
       return resp(res, 400, false, 'Materia independiente no debe tener porcentajeArea');
     }
@@ -142,7 +135,7 @@ export async function update(req, res) {
       }
       if (typeof porcentajeArea !== 'number') return resp(res, 400, false, 'porcentajeArea debe ser un número');
       if (porcentajeArea < 0 || porcentajeArea > 100) return resp(res, 400, false, 'porcentajeArea debe estar entre 0 y 100');
-      // validar suma (excluir la materia actual)
+
       const areaIdToCheck = area ?? materia.area.toString();
       const materiasArea = await Materia.find({ area: areaIdToCheck, activa: true }).select('porcentajeArea _id');
       const sumaExcluding = materiasArea.reduce((s, m) => s + ((m._id.toString() === id) ? 0 : (m.porcentajeArea || 0)), 0);
@@ -151,13 +144,11 @@ export async function update(req, res) {
       }
     }
 
-    // aplicar cambios
     if (area !== undefined) materia.area = area;
     if (nombre !== undefined) materia.nombre = nombre;
     if (codigo !== undefined) materia.codigo = codigo;
     if (esIndependiente !== undefined) materia.esIndependiente = esIndependiente;
     if (intensidadHoraria !== undefined) materia.intensidadHoraria = intensidadHoraria;
-    // porcentaje
     if (esIndependiente === true) {
       materia.porcentajeArea = null;
     } else if (porcentajeArea !== undefined) {
@@ -174,8 +165,26 @@ export async function update(req, res) {
   }
 }
 
-// DELETE /api/materias/:id  (soft delete)
-export async function remove(req, res) {
+// PUT /api/materias/:id/activar
+export async function activate(req, res) {
+  try {
+    const { id } = req.params;
+    if (!isValidId(id)) return resp(res, 400, false, 'ID inválido');
+
+    const materia = await Materia.findById(id);
+    if (!materia) return resp(res, 404, false, 'Materia no encontrada');
+
+    materia.activa = true;
+    await materia.save();
+    return resp(res, 200, true, 'Materia activada correctamente', materia);
+  } catch (err) {
+    console.error('❌ Error al activar materia:', err);
+    return resp(res, 500, false, 'Error al activar materia');
+  }
+}
+
+// PUT /api/materias/:id/desactivar
+export async function deactivate(req, res) {
   try {
     const { id } = req.params;
     if (!isValidId(id)) return resp(res, 400, false, 'ID inválido');
@@ -185,9 +194,9 @@ export async function remove(req, res) {
 
     materia.activa = false;
     await materia.save();
-    return resp(res, 200, true, 'Materia eliminada (soft delete)');
+    return resp(res, 200, true, 'Materia desactivada correctamente', materia);
   } catch (err) {
-    console.error('❌ Error al eliminar materia:', err);
-    return resp(res, 500, false, 'Error al eliminar materia');
+    console.error('❌ Error al desactivar materia:', err);
+    return resp(res, 500, false, 'Error al desactivar materia');
   }
 }
