@@ -53,3 +53,33 @@ export const remove = async (req, res) => {
     res.status(400).json({ error: 'ID inválido' });
   }
 };
+
+// Activar área
+export const activar = async (req, res) => {
+  try {
+    const area = await Area.findByIdAndUpdate(
+      req.params.id,
+      { active: true, updatedAt: new Date() },
+      { new: true }
+    );
+    if (!area) return res.status(404).json({ error: 'Área no encontrada' });
+    res.json(area);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// Desactivar área
+export const desactivar = async (req, res) => {
+  try {
+    const area = await Area.findByIdAndUpdate(
+      req.params.id,
+      { active: false, updatedAt: new Date() },
+      { new: true }
+    );
+    if (!area) return res.status(404).json({ error: 'Área no encontrada' });
+    res.json(area);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
