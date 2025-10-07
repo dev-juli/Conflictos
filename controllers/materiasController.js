@@ -1,202 +1,284 @@
-// controllers/materiasController.js
-import mongoose from 'mongoose';
-import Materia from '../models/materia.js';
-import Area from '../models/area.js';
+import mongoose from "mongoose";
+import Materia from "../models/materia.js";
+import Area from "../models/area.js";
 
-const isValidId = id => mongoose.Types.ObjectId.isValid(id);
-
-function resp(res, status, success, message, data = null) {
-  const payload = { success, message };
-  if (data !== null) payload.data = data;
-  return res.status(status).json(payload);
-}
-
-// GET /api/materias
-export async function getAll(req, res) {
+// Listar todas las materias
+export const getAll = async (req, res) => {
   try {
-    const materias = await Materia.find({}).populate('area', 'nombre codigo').lean();
-    return res.json({ success: true, data: materias });
-  } catch (err) {
-    console.error('❌ Error al listar materias:', err);
-    return resp(res, 500, false, 'Error al listar materias');
+    const materias = await Materia.find().populate("area", "nombre codigo");
+    res.json({
+      success: true,
+      message: "Materias listadas correctamente",
+      data: materias,
+    });
+  } catch (error) {
+    console.error("❌ Error en getAll:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al listar las materias",
+    });
   }
-}
+};
 
-// GET /api/materias/:id
-export async function getById(req, res) {
+// Obtener materia por ID
+export const getById = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidId(id)) return resp(res, 400, false, 'ID inválido');
 
-    const materia = await Materia.findById(id).populate('area', 'nombre codigo').lean();
-    if (!materia) return resp(res, 404, false, 'Materia no encontrada');
-    return resp(res, 200, true, 'Materia encontrada', materia);
-  } catch (err) {
-    console.error('❌ Error al obtener materia:', err);
-    return resp(res, 500, false, 'Error al obtener materia');
+    // Validar formato de ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "El ID proporcionado no es válido",
+      });
+    }
+
+    const materia = await Materia.findById(id).populate("area", "nombre codigo");
+
+    if (!materia) {
+      return res.status(404).json({
+        success: false,
+        message: "Materia no encontrada",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Materia obtenida correctamente",
+      data: materia,
+    });
+  } catch (error) {
+    console.error("❌ Error en getById:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener la materia",
+    });
   }
-}
+};
 
-// GET /api/areas/:id/materias
-export async function getByArea(req, res) {
+// Obtener materias por área
+export const getByArea = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidId(id)) return resp(res, 400, false, 'ID de área inválido');
 
-    const area = await Area.findById(id);
-    if (!area) return resp(res, 404, false, 'Área no encontrada');
+    // Validar formato de ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "El ID de área no es válido",
+      });
+    }
 
-    const materias = await Materia.find({ area: id, activa: true }).populate('area', 'nombre codigo').lean();
-    return resp(res, 200, true, 'Materias por área', materias);
-  } catch (err) {
-    console.error('❌ Error al obtener materias por área:', err);
-    return resp(res, 500, false, 'Error al obtener materias por área');
+    const materias = await Materia.find({ area: id }).populate("area", "nombre codigo");
+
+    res.json({
+      success: true,
+      message: "Materias por área listadas correctamente",
+      data: materias,
+    });
+  } catch (error) {
+    console.error("❌ Error en getByArea:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener las materias por área",
+    });
   }
-}
+};
 
-// POST /api/materias
-export async function create(req, res) {
+// Crear materia
+export const create = async (req, res) => {
   try {
     const { area, nombre, codigo, esIndependiente, porcentajeArea, intensidadHoraria } = req.body;
 
-    if (!nombre || !codigo || typeof esIndependiente !== 'boolean') {
-      return resp(res, 400, false, 'nombre, codigo y esIndependiente son obligatorios (esIndependiente debe ser boolean)');
+    console.log("📥 Datos recibidos:", req.body);
+
+    // Validar existencia del área
+    if (!mongoose.Types.ObjectId.isValid(area)) {
+      return res.status(400).json({
+        success: false,
+        message: "El ID de área no es válido",
+      });
     }
 
-    if (!area) {
-      return resp(res, 400, false, 'area es obligatorio (id de Area)');
+    const existing = await Materia.findOne({ codigo });
+    if (existing) {
+      return res.status(409).json({
+        success: false,
+        message: "Código de materia duplicado",
+      });
     }
-    if (!isValidId(area)) return resp(res, 400, false, 'ID de area inválido');
 
-    const areaExists = await Area.findById(area);
-    if (!areaExists) return resp(res, 404, false, 'Área no encontrada');
-
-    if (esIndependiente && porcentajeArea !== undefined && porcentajeArea !== null) {
-      return resp(res, 400, false, 'Materia independiente no debe tener porcentajeArea');
-    }
+    // Validar porcentaje acumulado si no es independiente
     if (!esIndependiente) {
-      if (porcentajeArea === null || porcentajeArea === undefined) {
-        return resp(res, 400, false, 'porcentajeArea es obligatorio si la materia no es independiente');
-      }
-      if (typeof porcentajeArea !== 'number') return resp(res, 400, false, 'porcentajeArea debe ser un número');
-      if (porcentajeArea < 0 || porcentajeArea > 100) return resp(res, 400, false, 'porcentajeArea debe estar entre 0 y 100');
+      const materiasArea = await Materia.find({ area, esIndependiente: false, activa: true });
+      const total = materiasArea.reduce((sum, m) => sum + (m.porcentajeArea || 0), 0);
 
-      const materiasArea = await Materia.find({ area: area, activa: true }).select('porcentajeArea');
-      const sumaActual = materiasArea.reduce((s, m) => s + (m.porcentajeArea || 0), 0);
-      if (sumaActual + porcentajeArea > 100) {
-        return resp(res, 400, false, `La suma de porcentajes en el área excede 100 (actual: ${sumaActual}%)`);
+      console.log(`📊 Total actual del área (${area}) = ${total}%`);
+
+      if (total + porcentajeArea > 100) {
+        return res.status(400).json({
+          success: false,
+          message: `La suma de porcentajes en el área excede 100 (actual: ${total}%)`,
+        });
       }
     }
 
-    const materia = new Materia({
+    const materia = await Materia.create({
       area,
       nombre,
       codigo,
       esIndependiente,
       porcentajeArea: esIndependiente ? null : porcentajeArea,
-      intensidadHoraria: intensidadHoraria ?? 0,
-      activa: true
+      intensidadHoraria,
+      activa: true,
     });
 
-    await materia.save();
-    const saved = await Materia.findById(materia._id).populate('area', 'nombre codigo').lean();
-    return resp(res, 201, true, 'Materia creada', saved);
-  } catch (err) {
-    console.error('❌ Error al crear materia:', err);
-    if (err.code === 11000) return resp(res, 409, false, 'Código de materia duplicado');
-    return resp(res, 500, false, 'Error al crear materia');
+    res.status(201).json({
+      success: true,
+      message: "Materia creada correctamente",
+      data: materia,
+    });
+  } catch (error) {
+    console.error("❌ Error en create:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al crear la materia",
+    });
   }
-}
+};
 
-// PUT /api/materias/:id
-export async function update(req, res) {
+//  Actualizar materia
+export const update = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidId(id)) return resp(res, 400, false, 'ID inválido');
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "El ID proporcionado no es válido",
+      });
+    }
 
     const materia = await Materia.findById(id);
-    if (!materia) return resp(res, 404, false, 'Materia no encontrada');
-
-    const { area, nombre, codigo, esIndependiente, porcentajeArea, intensidadHoraria } = req.body;
-
-    if (area !== undefined) {
-      if (!isValidId(area)) return resp(res, 400, false, 'ID de area inválido');
-      const areaExists = await Area.findById(area);
-      if (!areaExists) return resp(res, 404, false, 'Área (nueva) no encontrada');
+    if (!materia) {
+      return res.status(404).json({
+        success: false,
+        message: "Materia no encontrada",
+      });
     }
 
-    if (esIndependiente === true && porcentajeArea !== undefined && porcentajeArea !== null) {
-      return resp(res, 400, false, 'Materia independiente no debe tener porcentajeArea');
-    }
-
-    if (esIndependiente === false) {
-      if (porcentajeArea === null || porcentajeArea === undefined) {
-        return resp(res, 400, false, 'porcentajeArea es obligatorio si la materia no es independiente');
-      }
-      if (typeof porcentajeArea !== 'number') return resp(res, 400, false, 'porcentajeArea debe ser un número');
-      if (porcentajeArea < 0 || porcentajeArea > 100) return resp(res, 400, false, 'porcentajeArea debe estar entre 0 y 100');
-
-      const areaIdToCheck = area ?? materia.area.toString();
-      const materiasArea = await Materia.find({ area: areaIdToCheck, activa: true }).select('porcentajeArea _id');
-      const sumaExcluding = materiasArea.reduce((s, m) => s + ((m._id.toString() === id) ? 0 : (m.porcentajeArea || 0)), 0);
-      if (sumaExcluding + porcentajeArea > 100) {
-        return resp(res, 400, false, `La suma de porcentajes en el área excede 100 (actual excluyendo esta: ${sumaExcluding}%)`);
-      }
-    }
-
-    if (area !== undefined) materia.area = area;
-    if (nombre !== undefined) materia.nombre = nombre;
-    if (codigo !== undefined) materia.codigo = codigo;
-    if (esIndependiente !== undefined) materia.esIndependiente = esIndependiente;
-    if (intensidadHoraria !== undefined) materia.intensidadHoraria = intensidadHoraria;
-    if (esIndependiente === true) {
-      materia.porcentajeArea = null;
-    } else if (porcentajeArea !== undefined) {
-      materia.porcentajeArea = porcentajeArea;
-    }
-
+    Object.assign(materia, req.body);
     await materia.save();
-    const updated = await Materia.findById(id).populate('area', 'nombre codigo').lean();
-    return resp(res, 200, true, 'Materia actualizada', updated);
-  } catch (err) {
-    console.error('❌ Error al actualizar materia:', err);
-    if (err.code === 11000) return resp(res, 409, false, 'Código de materia duplicado');
-    return resp(res, 500, false, 'Error al actualizar materia');
-  }
-}
 
-// PUT /api/materias/:id/activar
-export async function activate(req, res) {
+    res.json({
+      success: true,
+      message: "Materia actualizada correctamente",
+      data: materia,
+    });
+  } catch (error) {
+    console.error("❌ Error en update:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al actualizar la materia",
+    });
+  }
+};
+// Activar materia
+export const activate = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidId(id)) return resp(res, 400, false, 'ID inválido');
 
-    const materia = await Materia.findById(id);
-    if (!materia) return resp(res, 404, false, 'Materia no encontrada');
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "El ID proporcionado no es válido",
+      });
+    }
 
-    materia.activa = true;
-    await materia.save();
-    return resp(res, 200, true, 'Materia activada correctamente', materia);
-  } catch (err) {
-    console.error('❌ Error al activar materia:', err);
-    return resp(res, 500, false, 'Error al activar materia');
+    const materia = await Materia.findByIdAndUpdate(id, { activa: true }, { new: true });
+    if (!materia) {
+      return res.status(404).json({
+        success: false,
+        message: "Materia no encontrada",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Materia activada correctamente",
+      data: materia,
+    });
+  } catch (error) {
+    console.error("❌ Error en activate:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al activar la materia",
+    });
   }
-}
+};
 
-// PUT /api/materias/:id/desactivar
-export async function deactivate(req, res) {
+// Desactivar materia
+export const deactivate = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidId(id)) return resp(res, 400, false, 'ID inválido');
 
-    const materia = await Materia.findById(id);
-    if (!materia) return resp(res, 404, false, 'Materia no encontrada');
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "El ID proporcionado no es válido",
+      });
+    }
 
-    materia.activa = false;
-    await materia.save();
-    return resp(res, 200, true, 'Materia desactivada correctamente', materia);
-  } catch (err) {
-    console.error('❌ Error al desactivar materia:', err);
-    return resp(res, 500, false, 'Error al desactivar materia');
+    const materia = await Materia.findByIdAndUpdate(id, { activa: false }, { new: true });
+    if (!materia) {
+      return res.status(404).json({
+        success: false,
+        message: "Materia no encontrada",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Materia desactivada correctamente",
+      data: materia,
+    });
+  } catch (error) {
+    console.error("❌ Error en deactivate:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al desactivar la materia",
+    });
   }
-}
+};
+//  Eliminar materia
+export const remove = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "El ID proporcionado no es válido",
+      });
+    }
+
+    const materia = await Materia.findByIdAndDelete(id);
+    if (!materia) {
+      return res.status(404).json({
+        success: false,
+        message: "Materia no encontrada",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Materia eliminada correctamente",
+    });
+  } catch (error) {
+    console.error("❌ Error en remove:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al eliminar la materia",
+    });
+  }
+};
