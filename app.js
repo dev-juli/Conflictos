@@ -5,7 +5,7 @@ import colegios from "./routes/Colegio.js";
 
 const app = express();
 
-// Middleware para permitir que Express entienda JSON
+// Middleware para permitir que Express entienda 
 app.use(express.json());
 
 
