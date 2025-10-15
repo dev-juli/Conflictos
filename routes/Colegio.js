@@ -1,13 +1,13 @@
 import Router from "express";
-import httppColegios from "../controllers/Colegios.js";
+import httpSchools from "../controllers/Colegios.js";
 
 const routes = Router()
 
-routes.get("/api/colegios/", httppColegios.obtenerColegios);
-routes.get("/api/colegios/:id", httppColegios.obtenerColegioId);
-routes.post("/api/colegios", httppColegios.crearColegio);
-routes.put("/api/colegios/:id", httppColegios.actualizarColegio);
-routes.put("/api/colegios/:id/activar", httppColegios.activarColegio);      // Ruta para activar
-routes.put("/api/colegios/:id/desactivar", httppColegios.desactivarColegio);
-routes.delete("/api/colegios/:id", httppColegios.borrarColegio);
+routes.get("/api/schools/", httpSchools.getSchools);
+routes.get("/api/schools/:id", httpSchools.getSchoolById);
+routes.post("/api/schools", httpSchools.createSchool);
+routes.put("/api/schools/:id", httpSchools.updateSchool);
+routes.put("/api/schools/:id/activate", httpSchools.activateSchool);      // Route to activate
+routes.put("/api/schools/:id/deactivate", httpSchools.deactivateSchool);
+routes.delete("/api/schools/:id", httpSchools.deleteSchool);
 export default routes

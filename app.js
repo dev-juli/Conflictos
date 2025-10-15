@@ -2,7 +2,6 @@ import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
 import colegios from "./routes/Colegio.js";
-import direccionesNucleo from "./routes/DireccionNucleo.js";
 
 const app = express();
 
@@ -11,7 +10,6 @@ app.use(express.json());
 
 
 app.use(colegios);
-app.use(direccionesNucleo);
 
 const port = process.env.PORT || 3000;
 

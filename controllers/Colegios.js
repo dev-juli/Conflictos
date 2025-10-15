@@ -1,56 +1,53 @@
 import Colegio from "../models/Colegios.js";
-import CoreDirection from "../models/DireccionNucleo.js"; 
 
-const httppColegios = {
-    obtenerColegios: async (req, res)=>{
+const httpSchools = {
+    getSchools: async (req, res)=>{
         try {
-            const colegios = await Colegio.find()
-            res.json(colegios);
+            const schools = await Colegio.find()
+            res.json(schools);
         } catch (error) {
             res.status(500).json({message: "Error al obtener los colegios"});
         }
     },
 
-    obtenerColegioId : async (req, res)=>{
+    getSchoolById : async (req, res)=>{
         try {
             const {id} = req.params;
             console.log(id);
-            const colegio = await Colegio.findById(id)
-            if(!colegio){
+            const school = await Colegio.findById(id)
+            if(!school){
                 return res.status(404).json({message: "Colegio no encontrado"});
             }
-            res.json({colegio});
+            res.json({school});
         } catch (error) {
             res.status(500).json({message: "Error al obtener el colegio"});
         }
     },
 
-    crearColegio: async (req, res)=>{
+    createSchool: async (req, res)=>{
         try {
             const { core_address } = req.body;
-
-            // 1. Validar que la Dirección de Núcleo exista
-            const direccionExistente = await CoreDirection.findById(core_address);
-            if (!direccionExistente) {
-                return res.status(404).json({ message: "La Dirección de Núcleo especificada no existe." });
+            
+            if (!core_address) {
+                return res.status(400).json({ message: "El core_address es requerido" });
             }
 
-            const colegio = new Colegio(req.body);
-            await colegio.save();
-            res.status(201).json({ message: "Colegio creado correctamente", colegio });
+            const school = new Colegio(req.body);
+            await school.save();
+            res.status(201).json({ message: "Colegio creado correctamente", school }); // Cambiado 'colegio' por 'school'
         } catch (error) {
             res.status(500).json({message: "Error al crear el colegio", error: error.message});
         }
     },
-    actualizarColegio: async (req, res)=>{
+    updateSchool: async (req, res)=>{
         try {
             const {id} = req.params;
             const { core_address } = req.body;
-            const colegio = await Colegio.findByIdAndUpdate(id, req.body, {new: true}) 
-            if(!colegio){
+            const school = await Colegio.findByIdAndUpdate(id, req.body, {new: true}) 
+            if(!school){
                 return res.status(404).json({message: "Colegio no encontrado"});
             }
-            res.json({ message: "Colegio actualizado correctamente", colegio});
+            res.json({ message: "Colegio actualizado correctamente", school});
 
         } catch (error) {
             res.status(500).json({message:"Error al actualizar el Colegio", error: error.message})
@@ -58,18 +55,18 @@ const httppColegios = {
     },
 
 
-    activarColegio: async (req, res)=>{
+    activateSchool: async (req, res)=>{
         try {
          const {id} = req.params;
-         const colegio = await Colegio.findByIdAndUpdate(
+         const school = await Colegio.findByIdAndUpdate(
              id,
              {active: true},
              {new: true}
          )
-         if(!colegio){
+         if(!school){
             return res.status(404).json({ message: "Colegio no Encontrado"})
          }
-         res.json({message: "Colegio Activado Correctamente", colegio})
+         res.json({message: "Colegio Activado Correctamente", school})
 
 
         } catch (error) {
@@ -78,18 +75,18 @@ const httppColegios = {
 
     },
 
-    desactivarColegio: async(req, res)=>{
+    deactivateSchool: async(req, res)=>{
         try {
         const { id } = req.params;
-        const colegio = await Colegio.findByIdAndUpdate(
+        const school = await Colegio.findByIdAndUpdate(
             id,
             { active: false },
             { new: true }
         );
-        if (!colegio) {
+        if (!school) {
             return res.status(404).json({ message: "Colegio no encontrado" });
         }
-        res.json({ message: "Colegio desactivado correctamente", colegio });
+        res.json({ message: "Colegio desactivado correctamente", school });
     } catch (error) {
         res.status(500).json({ message: "Error al desactivar el colegio" });
     }
@@ -97,12 +94,12 @@ const httppColegios = {
     },
 
 
-    borrarColegio: async (req, res)=>{
+    deleteSchool: async (req, res)=>{
 
         try {
             const {id} = req.params;
-            const colegio = await Colegio.findByIdAndDelete(id);
-            res.json({ message: "Colegio borrado correctamente", colegio});
+            const school = await Colegio.findByIdAndDelete(id);
+            res.json({ message: "Colegio borrado correctamente", school});
             
         } catch (error) {
             res.status(500).json({message: "Error al borrar el colegio"});
@@ -113,4 +110,4 @@ const httppColegios = {
 
 }
 
-export default httppColegios;
+export default httpSchools;

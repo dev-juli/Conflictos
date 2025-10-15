@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
-const ColegioEsquema = new mongoose.Schema({
+const SchoolSchema = new mongoose.Schema({
     core_address: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'DireccionNucleo',
+        ref: 'CoreDirection',
         required: true
     },
     name: { type: String, required: true,},
@@ -20,6 +20,6 @@ const ColegioEsquema = new mongoose.Schema({
 }, {
 });
 
-const Colegio = mongoose.model('Colegio', ColegioEsquema);
+const School = mongoose.model('School', SchoolSchema);
 
-export default Colegio;
+export default School;
