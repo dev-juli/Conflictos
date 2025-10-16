@@ -11,6 +11,6 @@ router.post('/register', registrar);
 router.post('/login', login);
 
 // Obtener perfil
-router.get('/perfil', auth, perfil);
+router.get('/profile', auth, perfil);
 
 export default router;

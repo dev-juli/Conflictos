@@ -1,4 +1,3 @@
-// controllers/authController.js
 import UsuariosColegio from '../models/usersSchool.js';
 import jwt from 'jsonwebtoken';
 

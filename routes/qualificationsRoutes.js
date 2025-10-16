@@ -5,11 +5,11 @@ import roleCheck from '../middlewares/roleCheck.js';
 
 const router = express.Router();
 
-/**
- * Reglas de acceso según documento:
- * - Rector, Coordinador: solo pueden listar (GET)
- * - Secretaria: puede hacer todo (GET, POST, PUT)
- */
+
+//  Reglas de acceso según documento:
+//  Rector, Coordinador: solo pueden listar (GET)
+//  Secretaria: puede hacer todo (GET, POST, PUT)
+ 
 
 // Obtener calificación por ID
 router.get('/:id', auth, roleCheck(['rector', 'coordinador', 'secretaria']), controller.obtener);

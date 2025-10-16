@@ -72,6 +72,9 @@ export const listarFinalesPorGrupo = async (req, res) => {
 export const crear = async (req, res) => {
   try {
     const data = req.body;
+
+    // Por ahora, permitimos que secretaria cree notas
+    // En el futuro: validar si req.user.rol === 'profesor' y pertenece a la materia/grupo
     data.registradoPor = req.user?._id || data.registradoPor;
     const created = await service.crear(data);
     res.status(201).json(created);

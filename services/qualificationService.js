@@ -5,14 +5,11 @@ import Calificacion from '../models/qualifications.js';
 import mongoose from 'mongoose';
 
 export const crear = async (data) => {
-  // data: colegio, estudiante, materia, grupo, periodo, año, tipoNota, nota, juicioValorativo, ...
   const created = await Calificacion.create(data);
   return created;
 };
 
 export const crearLote = async (calificacionesArray) => {
-  // calificacionesArray -> [ { ... } ]
-  // Opcional: transacción para atomicidad
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
@@ -46,7 +43,7 @@ export const generarFinales = async ({ colegioId, año, grupoId = null }) => {
     sumaPorcentajes += pct;
   });
   if (sumaPorcentajes === 0) {
-    // evitar division by zero; asumimos igual peso entre periodos si no hay porcentajes
+    // evitar division por cero; asumimos igual peso entre periodos si no hay porcentajes
     const equalPct = 100 / (periodos.length || 1);
     periodos.forEach(p => { periodosMap[p._id.toString()] = equalPct; });
     sumaPorcentajes = 100;
@@ -77,7 +74,6 @@ export const generarFinales = async ({ colegioId, año, grupoId = null }) => {
   try {
     for (const key of Object.keys(agrup)) {
       const item = agrup[key];
-      // Si sumPct != 100, normalizamos por la suma
       const norma = item.sumPct || 100;
       const notaFinal = (item.sumWeighted / (norma/100));
       const finalObj = {

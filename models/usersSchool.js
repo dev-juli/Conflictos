@@ -16,7 +16,7 @@ const usuarioColegioSchema = new Schema({
   },
   nombre: { type: String, required: true },
   apellido: { type: String, required: true },
-  correo: { type: String, required: false }, // Ya no es único ni obligatorio
+  correo: { type: String, required: false }, // No es único ni obligatorio
   contraseña: { type: String, required: true },
   rol: {
     type: String,
@@ -39,5 +39,5 @@ usuarioColegioSchema.methods.compararContraseña = async function (passwordIngre
   return bcrypt.compare(passwordIngresada, this.contraseña);
 };
 
-export default model('UsuariosColegio', usuarioColegioSchema);
+export default model('usersSchool', usuarioColegioSchema);
 
