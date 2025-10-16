@@ -1,4 +1,5 @@
 import Headquarters from "../models/headquarters.js";
+import { isValidObjectId } from "mongoose";
 
 const httpSede = {
     listAll: async (req, res) => {
@@ -7,20 +8,26 @@ const httpSede = {
             res.status(200).json({ headquarters })
             
         } catch (error) {
-            console.log(error);
-            res.status(400).json({ msg: "Error al listar todas las Sedes" });
+            console.error(error);
+            res.status(500).json({ msg: "Error interno del servidor" });
         }
     },
 
     listById: async (req, res) => {
+        const { id } = req.params;
+
         try {
-            const { id } = req.params;
+
+            if (!isValidObjectId(id)) {
+                return res.status(400).json({ msg: "ID inválido" });
+            }
+
             const sedeId = await Headquarters.findById(id);
             res.status(200).json({ data: sedeId })
 
         } catch (error) {
-            console.log(error);
-            res.status(400).json({ msg: "Error al listar la sede" }); 
+            console.error(error);
+            res.status(500).json({ msg: "Error interno del servidor" }); 
         }
     },
 
@@ -38,8 +45,8 @@ const httpSede = {
             res.status(200).json({ data: sedes })
 
         } catch (error) {
-            console.log(error);
-            res.status(400).json({ msg: "Error al listar la sede por colegio" });
+            console.error(error);
+            res.status(500).json({ msg: "Error interno del servidor" });
         }
     },
 
@@ -52,8 +59,8 @@ const httpSede = {
             res.json({ msg: "Sede creada con exito", data: sede });
             
         } catch (error) {
-            console.log(error);
-            res.status(400).json({ msg: "Error al guardar la sede" });
+            console.error(error);
+            res.status(500).json({ msg: "Error interno del servidor" });
         } 
     },
 
@@ -62,6 +69,11 @@ const httpSede = {
         const { school, name, abbreviation, code, address, phone, } = req.body;
 
         try {
+
+            if (!isValidObjectId(id)) {
+                return res.status(400).json({ msg: "ID inválido" });
+            }
+
             const sedeUpdated = await Headquarters.findByIdAndUpdate(id, {
                     school,
                     name,
@@ -72,23 +84,29 @@ const httpSede = {
                     updatedAt: Date.now(),
                 },
                 {new: true});
+
+                if (!sedeUpdated){
+                    return res.status(404).json({ msg: "Esta Sede no existe" });
+                }
+
                 res.json({ msg: "Sede actualizada con exito", data: sedeUpdated });
             
-            if (!sedeUpdated){
-                return res.status(404).json({ msg: "Esta Sede no existe" });
-            }
 
         } catch (error) {
-            console.log(error);
-            res.status(400).json({ msg: "Error al actualizar la sede" })
+            console.error(error);
+            res.status(500).json({ msg: "Error interno del servidor" });
         }
     },
 
     activateHeadquarters: async (req, res) => {
         const { id } = req.params;
         
-    
         try {
+
+            if (!isValidObjectId(id)) {
+                return res.status(400).json({ msg: "ID inválido" });
+            }
+
             const buscarSedeActiva = await Headquarters.findByIdAndUpdate(id, 
                 {isActive: true},
                 {new: true}
@@ -98,11 +116,11 @@ const httpSede = {
                 return res.status(404).json({ msg: "Esta Sede no existe" });
             }
 
-            res.status(200).json({ msg: "Sede inactiva", data: buscarSedeActiva })
+            res.status(200).json({ msg: "Sede activada", data: buscarSedeActiva })
 
         } catch (error) {
-            console.log(error);
-            res.status(400).json({ msg: "Error al cambiar el estado 'Activa' de la sede" })
+            console.error(error);
+            res.status(500).json({ msg: "Error interno del servidor" });
         }
         
     },
@@ -111,6 +129,11 @@ const httpSede = {
         const { id } = req.params;
         
         try {
+
+            if (!isValidObjectId(id)) {
+                return res.status(400).json({ msg: "ID inválido" });
+            }
+
             const buscarSedeInactiva = await Headquarters.findByIdAndUpdate(id, 
                 {isActive: false},
                 {new: true}
@@ -123,12 +146,12 @@ const httpSede = {
             res.status(200).json({ msg: "Sede inactiva", data: buscarSedeInactiva });
 
         } catch (error) {
-            console.log(error);
-            res.status(400).json({ msg: "Error al cambiar el estado 'Inactiva' de la sede" })
+            console.error(error);
+            res.status(500).json({ msg: "Error interno del servidor" });
         }
     },
 
-    deleteHeadquaters: async(req, res) => {
+    deleteHeadquarters: async(req, res) => {
         const { id } = req.params;
 
         try {
@@ -141,8 +164,8 @@ const httpSede = {
             res.status(200).json({ msg: "Sede eliminada correctamente" })
 
         } catch (error) {
-            console.log(error);
-            res.status(400).json({ msg: "Error al eliminar la sede" }) 
+            console.error(error);
+            res.status(500).json({ msg: "Error interno del servidor" }); 
         }
     }
 };

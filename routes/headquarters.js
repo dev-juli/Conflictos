@@ -10,6 +10,6 @@ routes.post("/", httpHeadquarters.createHeadquarters);
 routes.put("/:id", httpHeadquarters.updateHeadquarters);
 routes.put("/:id/activar", httpHeadquarters.activateHeadquarters);
 routes.put("/:id/inactivar", httpHeadquarters.deactivateHeadquarters);
-routes.delete("/:id", httpHeadquarters.deleteHeadquaters);
+routes.delete("/:id", httpHeadquarters.deleteHeadquarters);
 
 export default routes;
