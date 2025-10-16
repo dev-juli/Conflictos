@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const SchoolSchema = new mongoose.Schema({
     core_address: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'CoreDirection',
+        ref: 'coredirections',
         required: true
     },
     name: { type: String, required: true,},
