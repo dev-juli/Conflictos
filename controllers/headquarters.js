@@ -1,5 +1,4 @@
 import Headquarters from "../models/headquarters.js";
-import { isValidObjectId } from "mongoose";
 
 const httpSede = {
     listAll: async (req, res) => {
@@ -17,10 +16,6 @@ const httpSede = {
         const { id } = req.params;
 
         try {
-
-            if (!isValidObjectId(id)) {
-                return res.status(400).json({ msg: "ID inválido" });
-            }
 
             const sedeId = await Headquarters.findById(id);
             res.status(200).json({ data: sedeId })
@@ -70,10 +65,6 @@ const httpSede = {
 
         try {
 
-            if (!isValidObjectId(id)) {
-                return res.status(400).json({ msg: "ID inválido" });
-            }
-
             const sedeUpdated = await Headquarters.findByIdAndUpdate(id, {
                     school,
                     name,
@@ -103,10 +94,6 @@ const httpSede = {
         
         try {
 
-            if (!isValidObjectId(id)) {
-                return res.status(400).json({ msg: "ID inválido" });
-            }
-
             const buscarSedeActiva = await Headquarters.findByIdAndUpdate(id, 
                 {isActive: true},
                 {new: true}
@@ -129,10 +116,6 @@ const httpSede = {
         const { id } = req.params;
         
         try {
-
-            if (!isValidObjectId(id)) {
-                return res.status(400).json({ msg: "ID inválido" });
-            }
 
             const buscarSedeInactiva = await Headquarters.findByIdAndUpdate(id, 
                 {isActive: false},
