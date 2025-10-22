@@ -1,28 +1,34 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import areaRoutes from './routes/areaRoutes.js';
+import materiaRoutes from './routes/subjects.js';
 
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+const MONGO_URL = process.env.MONGO_URL;
 
 // Middleware para parsear JSON
 app.use(express.json());
 
-// Conexión a MongoDB usando variable de entorno MONGO_URL
-mongoose.connect(process.env.MONGO_URL, {
+// Conexión a MongoDB
+mongoose.connect(MONGO_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-.then(() => console.log('DB conectada!'))
-.catch(err => console.error('Error conectando DB:', err));
+.then(() => console.log('Conectado a MongoDB Atlas'))
+.catch((error) => console.error('Error al conectar a MongoDB:', error));
 
-// Usa las rutas
-app.use('/api/areas', areaRoutes);
+// Rutas
+app.use('/api/materias', materiaRoutes);
 
-// Inicia el servidor
-const PORT = process.env.PORT || 3000;
+// Ruta raíz simple para probar servidor
+app.get('/', (req, res) => {
+  res.send('API de Materias funcionando');
+});
+
+// Inicio del servidor
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });
