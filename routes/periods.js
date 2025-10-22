@@ -1,8 +1,7 @@
-// routes/periods.js
-const { Router } = require('express');
-const { check } = require('express-validator');
-const validateFields = require('../middlewares/checksPeriodos').default || require('../middlewares/checksPeriodos');
-const httpPeriods = require('../controllers/periodController');
+import { Router } from 'express';
+import { check } from 'express-validator';
+import validateFields from '../middlewares/checksPeriodos.js';
+import * as httpPeriods from '../controllers/periodController.js';
 
 const router = Router();
 
@@ -71,4 +70,4 @@ router.delete('/:id', [
   validateFields
 ], httpPeriods.deletePeriod);
 
-module.exports = router;
+export default router;

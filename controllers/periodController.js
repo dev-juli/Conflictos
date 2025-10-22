@@ -1,5 +1,4 @@
-
-const Period = require('../models/period');
+import Period from '../models/period.js';
 
 // Validar que por porcentajes no pasen del 100%
 const validateTotalPercentage = async (schoolId, year, periodId = null) => {
@@ -28,7 +27,7 @@ const validateNumberByCycle = (cycle, number) => {
 };
 
 //get 
-const getAll = async (req, res) => {
+export const getAll = async (req, res) => {
     try {
         const periods = await Period.find().populate('school', 'name');
         res.json(periods);
@@ -38,7 +37,7 @@ const getAll = async (req, res) => {
 };
 
 // GET /api/periods/:id
-const getById = async (req, res) => {
+export const getById = async (req, res) => {
     try {
         const period = await Period.findById(req.params.id);
         if (!period) return res.status(404).json({ message: 'Periodo no encontrado' });
@@ -49,7 +48,7 @@ const getById = async (req, res) => {
 };
 
 // GET /api/periods/year/:year
-const getByYear = async (req, res) => {
+export const getByYear = async (req, res) => {
     try {
         const { year } = req.params;
         const periods = await Period.find({ year: parseInt(year) }).populate('school', 'name');
@@ -60,7 +59,7 @@ const getByYear = async (req, res) => {
 };
 
 // POST /api/periods
-const createPeriod = async (req, res) => {
+export const createPeriod = async (req, res) => {
     try {
         const { school, year, cycle, number, name, startDate, endDate, percentage } = req.body;
 
@@ -105,7 +104,7 @@ const createPeriod = async (req, res) => {
 };
 
 // PUT /api/periods/:id
-const updatePeriod = async (req, res) => {
+export const updatePeriod = async (req, res) => {
     try {
         const { id } = req.params;
         const { school, year, cycle, number, percentage } = req.body;
@@ -146,7 +145,7 @@ const updatePeriod = async (req, res) => {
 };
 
 // PUT /api/periods/:id/activate
-const activatePeriod = async (req, res) => {
+export const activatePeriod = async (req, res) => {
     try {
         const periodo = await Period.findByIdAndUpdate(
             req.params.id,
@@ -161,7 +160,7 @@ const activatePeriod = async (req, res) => {
 };
 
 // PUT /api/periods/:id/deactivate
-const deactivatePeriod = async (req, res) => {
+export const deactivatePeriod = async (req, res) => {
     try {
         const periodo = await Period.findByIdAndUpdate(
             req.params.id,
@@ -176,7 +175,7 @@ const deactivatePeriod = async (req, res) => {
 };
 
 // DELETE /api/periods/:id
-const deletePeriod = async (req, res) => {
+export const deletePeriod = async (req, res) => {
     try {
         const periodo = await Period.findByIdAndDelete(req.params.id);
         if (!periodo) return res.status(404).json({ message: 'Período no encontrado' });
@@ -184,15 +183,4 @@ const deletePeriod = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error al eliminar el período', error: error.message });
     }
-};
-
-module.exports = {
-    getAll,
-    getById,
-    getByYear,
-    createPeriod,
-    updatePeriod,
-    activatePeriod,
-    deactivatePeriod,
-    deletePeriod
 };

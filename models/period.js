@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+import mongoose from 'mongoose';
+const { Schema } = mongoose;
 
 const periodSchema = new Schema({
   school: {
@@ -61,4 +61,4 @@ periodSchema.pre('validate', function(next){
 //indice unico el colegio no puede tener dos periodos con el mismo numero en un año
 periodSchema.index({ school: 1, year: 1, number: 1 }, { unique: true });
 
-module.exports = mongoose.model('Period', periodSchema);
+export default mongoose.model('Period', periodSchema);
