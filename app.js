@@ -9,7 +9,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URL = process.env.MONGO_URL;
 
-// Middleware para parsear JSON
+// 🧩 Middlewares globales
+app.use(cors());
 app.use(express.json());
 
 // Conexión a MongoDB
