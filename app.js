@@ -1,41 +1,41 @@
+import 'dotenv/config';
 import express from 'express';
-import dotenv from 'dotenv';
-import morgan from 'morgan';
-import cors from 'cors';
-import connectDB from './db.js';
+import mongoose from 'mongoose';
 
-
-import qualificationsRoutes from './routes/qualificationsRoutes.js';
-import authRoutes from './routes/auth.js'
-
-dotenv.config(); // Carga variables de entorno (.env)
-connectDB(); // Conexión a MongoDB
+// Importación de rutas
+import periodsRoutes from './routes/periods.js';
+import direccionNucleoRoutes from './routes/coreDirectionRoutes.js';
+import colegiosRoutes from './routes/Colegio.js';
+import headquartersRoutes from './routes/headquarters.js';
 
 const app = express();
 
-// Middlewares globales
-app.use(cors()); // Permitir peticiones de otros orígenes
-app.use(express.json()); // Parsear JSON
-app.use(morgan('dev')); // Logs de peticiones (opcional)
+// Middleware para parsear JSON
+app.use(express.json());
 
 // Rutas principales
-app.get('/', (req, res) => {
-  res.json({ message: 'API de Gestión Escolar funcionando correctamente ✅' });
+app.use('/api', direccionNucleoRoutes);
+app.use('/api', colegiosRoutes);
+app.use('/api/sedes', headquartersRoutes);
+app.use('/api/periodos', periodsRoutes);
+
+// Middleware para manejo de errores
+app.use((err, req, res, next) => {
+  console.error('🛑 Error:', err.stack);
+  res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-// Rutas de autenticación
-app.use('/api/auth', authRoutes);
+// Conexión a MongoDB
+mongoose
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('✅ MongoDB conectado correctamente'))
+  .catch((err) => console.error('❌ Error al conectar con MongoDB:', err));
 
-// Montar las rutas del módulo de calificaciones
-app.use('/api/calificaciones', qualificationsRoutes);
-
-// Manejo básico de errores (404)
-app.use((req, res, next) => {
-  res.status(404).json({ message: 'Ruta no encontrada 😕' });
-});
-
-// Servidor
-const PORT = process.env.PORT;
+// Iniciar servidor
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
