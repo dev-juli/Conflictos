@@ -8,7 +8,7 @@ const httpSchools = {
         } catch (error) {
             res.status(500).json({message: "Error al obtener los colegios"});
         }
-    },  
+    },
 
     getSchoolById : async (req, res)=>{
         try {
