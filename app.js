@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import materiaRoutes from './routes/subjects.js';
 import periodsRoutes from './routes/periods.js';
 import direccionNucleoRoutes from './routes/coreDirectionRoutes.js';
-import colegiosRoutes from './routes/Colegio.js';
+import colegiosRoutes from './routes/schools.js';
 import headquartersRoutes from './routes/headquarters.js';
 
 const app = express();
